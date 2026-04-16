@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Self-Love Lab 💖</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #FDF6EE;
+      --blush: #F2C4CE;
+      --rose: #D4849A;
+      --deep: #8B3A52;
+      --warm: #F7A58A;
+      --gold: #E8B98A;
+      --text: #3D2022;
+      --text-soft: #7A5055;
+      --white: #FFFFFF;
+      --card: rgba(255,255,255,0.75);
+    }
+
+    html, body {
+      min-height: 100%;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── Background blobs ── */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      z-index: 0;
+      pointer-events: none;
+    }
+    body::before {
+      width: 340px; height: 340px;
+      background: radial-gradient(circle, #F2C4CE88, transparent 70%);
+      top: -80px; right: -80px;
+    }
+    body::after {
+      width: 280px; height: 280px;
+      background: radial-gradient(circle, #F7A58A55, transparent 70%);
+      bottom: 60px; left: -60px;
+    }
+
+    #app {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 20px 40px;
+    }
+
+    /* ── Screen base ── */
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 420px;
+      animation: fadeUp 0.5s ease both;
+    }
+    .screen.active { display: flex; flex-direction: column; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Intro screen ── */
+    .intro-icon {
+      font-size: 64px;
+      text-align: center;
+      margin-bottom: 16px;
+      animation: pulse 3s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.07); }
+    }
+
+    .intro-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.6rem;
+      line-height: 1.15;
+      text-align: center;
+      color: var(--deep);
+      margin-bottom: 8px;
+    }
+    .intro-title em {
+      font-style: italic;
+      color: var(--rose);
+    }
+
+    .intro-sub {
+      text-align: center;
+      font-size: 0.95rem;
+      color: var(--text-soft);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .pill-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 36px;
+    }
+    .pill {
+      background: var(--blush);
+      color: var(--deep);
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 5px 14px;
+      border-radius: 999px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--rose), var(--warm));
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      box-shadow: 0 8px 24px rgba(212,132,154,0.35);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-primary:active {
+      transform: scale(0.97);
+      box-shadow: 0 4px 12px rgba(212,132,154,0.25);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 2px solid var(--blush);
+      color: var(--rose);
+      border-radius: 16px;
+      padding: 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 12px;
+      transition: background 0.15s;
+    }
+    .btn-ghost:active { background: var(--blush); }
+
+    /* ── Quiz screen ── */
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .progress-bar {
+      flex: 1;
+      height: 6px;
+      background: var(--blush);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--rose), var(--warm));
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+    .progress-label {
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .q-tag {
+      display: inline-block;
+      background: var(--blush);
+      color: var(--deep);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+    }
+
+    .q-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      line-height: 1.35;
+      color: var(--deep);
+      margin-bottom: 28px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card);
+      border: 2px solid transparent;
+      border-radius: 16px;
+      padding: 14px 16px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 12px rgba(61,32,34,0.06);
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      text-align: left;
+      width: 100%;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .option:active { transform: scale(0.98); }
+    .option.selected {
+      border-color: var(--rose);
+      background: #FDEDF1;
+    }
+
+    .option-emoji { font-size: 1.5rem; flex-shrink: 0; }
+    .option-text  { font-size: 0.95rem; color: var(--text); line-height: 1.4; }
+
+    .next-wrap { margin-top: 28px; }
+
+    /* ── Result screen ── */
+    .result-badge {
+      text-align: center;
+      font-size: 72px;
+      margin-bottom: 10px;
+      animation: pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+    @keyframes pop {
+      from { transform: scale(0.5); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .result-level {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--deep);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .result-score {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      margin-bottom: 24px;
+    }
+
+    .result-card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 20px rgba(61,32,34,0.07);
+      margin-bottom: 16px;
+    }
+
+    .result-msg {
+      font-size: 0.97rem;
+      line-height: 1.65;
+      color: var(--text);
+      text-align: center;
+      font-style: italic;
+    }
+
+    .suggestions-title {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--rose);
+      margin-bottom: 12px;
+    }
+
+    .suggestion-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .suggestion-dot {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--rose), var(--warm));
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .booth-cta {
+      background: linear-gradient(135deg, #F2C4CE, #F7D5A8);
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .booth-cta-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--deep);
+      margin-bottom: 6px;
+    }
+    .booth-cta-sub {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      line-height: 1.5;
+    }
+
+    /* ── Decorative divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0 20px;
+      color: var(--blush);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--blush);
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ════════ INTRO ════════ -->
+  <div class="screen active" id="screen-intro">
+    <div class="intro-icon">🪞</div>
+    <h1 class="intro-title">Self&#8209;Love<br/><em>Lab</em></h1>
+    <p class="intro-sub">A short reflection to discover how kindly<br/>you treat the most important person—<strong>you</strong>.</p>
+    <div class="pill-row">
+      <span class="pill">4 questions</span>
+      <span class="pill">2 minutes</span>
+      <span class="pill">100% honest</span>
+    </div>
+    <button class="btn-primary" onclick="startQuiz()">Begin the Lab ✨</button>
+  </div>
+
+  <!-- ════════ QUIZ ════════ -->
+  <div class="screen" id="screen-quiz">
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:25%"></div></div>
+      <span class="progress-label" id="progress-label">1 / 4</span>
+    </div>
+    <span class="q-tag" id="q-tag">Self-Talk</span>
+    <p class="q-text" id="q-text">When you make a mistake...</p>
+    <div class="options" id="options-container"></div>
+    <div class="next-wrap">
+      <button class="btn-primary" id="btn-next" onclick="nextQuestion()" style="display:none">Next →</button>
+    </div>
+  </div>
+
+  <!-- ════════ RESULT ════════ -->
+  <div class="screen" id="screen-result">
+    <div class="result-badge" id="result-badge">💖</div>
+    <h2 class="result-level" id="result-level">Strong Self-Love</h2>
+    <p class="result-score" id="result-score">Score: 0 / 8</p>
+
+    <div class="result-card">
+      <p class="result-msg" id="result-msg"></p>
+    </div>
+
+    <div class="result-card">
+      <p class="suggestions-title">💡 Gentle Suggestions</p>
+      <div id="suggestions-list"></div>
+    </div>
+
+    <div class="booth-cta">
+      <p class="booth-cta-title">🪞 Now visit the mirror</p>
+      <p class="booth-cta-sub">Head over to our booth — look in the mirror and meet someone worth loving.</p>
+    </div>
+
+    <button class="btn-primary" onclick="restartQuiz()">Take it again 🔄</button>
+  </div>
+
+</div>
+
+<script>
+  const questions = [
+    {
+      tag: "🌱 Self-Talk",
+      text: "When you make a mistake...",
+      options: [
+        { emoji: "😞", text: "I blame myself harshly", score: 0 },
+        { emoji: "😐", text: "I feel bad but move on", score: 1 },
+        { emoji: "💚", text: "I forgive myself and learn", score: 2 }
+      ]
+    },
+    {
+      tag: "📱 Comparison",
+      text: "When you see others doing better...",
+      options: [
+        { emoji: "😔", text: "I feel insecure", score: 0 },
+        { emoji: "😐", text: "I compare a little", score: 1 },
+        { emoji: "✨", text: "I feel inspired", score: 2 }
+      ]
+    },
+    {
+      tag: "🛌 Self-Care",
+      text: "How do you treat yourself when stressed?",
+      options: [
+        { emoji: "😵", text: "Ignore it", score: 0 },
+        { emoji: "😐", text: "Distract myself", score: 1 },
+        { emoji: "💆", text: "Take care of myself", score: 2 }
+      ]
+    },
+    {
+      tag: "💬 Inner Voice",
+      text: "How do you speak to yourself daily?",
+      options: [
+        { emoji: "😞", text: "Mostly negative", score: 0 },
+        { emoji: "😐", text: "Neutral", score: 1 },
+        { emoji: "💖", text: "Encouraging", score: 2 }
+      ]
+    }
+  ];
+
+  const results = {
+    strong: {
+      badge: "💖",
+      level: "Strong Self-Love",
+      msg: "You treat yourself with real kindness and compassion. That's a beautiful thing — keep nurturing it and share that warmth with others too.",
+      suggestions: [
+        "Keep celebrating your small wins every day",
+        "Share your self-compassion practices with friends",
+        "Stay mindful — self-love is a daily practice"
+      ]
+    },
+    growing: {
+      badge: "🌱",
+      level: "Growing Self-Love",
+      msg: "You're learning to be kinder to yourself, and that growth is real. There's still beautiful room to bloom — you deserve the same care you'd give a best friend.",
+      suggestions: [
+        "Practice positive self-talk, even just once a day",
+        "Take breaks without guilt — rest is productive",
+        "Stop comparing your chapter 1 to someone's chapter 20"
+      ]
+    },
+    needs: {
+      badge: "💔",
+      level: "Time for Self-Care",
+      msg: "You've been giving a lot — maybe too much to others and not enough to yourself. This isn't a flaw; it's a sign you deserve more love, starting from within.",
+      suggestions: [
+        "Try speaking to yourself like you'd speak to someone you love",
+        "Start small: 5 minutes a day that's just for you",
+        "Remember: you cannot pour from an empty cup"
+      ]
+    }
+  };
+
+  let currentQ = 0;
+  let totalScore = 0;
+  let selectedScore = null;
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById(id);
+    el.classList.add('active');
+    // re-trigger animation
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = '';
+  }
+
+  function startQuiz() {
+    currentQ = 0;
+    totalScore = 0;
+    renderQuestion();
+    show('screen-quiz');
+  }
+
+  function renderQuestion() {
+    const q = questions[currentQ];
+    selectedScore = null;
+
+    document.getElementById('q-tag').textContent = q.tag;
+    document.getElementById('q-text').textContent = q.text;
+    document.getElementById('progress-label').textContent = `${currentQ + 1} / ${questions.length}`;
+    document.getElementById('progress-fill').style.width = `${((currentQ + 1) / questions.length) * 100}%`;
+    document.getElementById('btn-next').style.display = 'none';
+
+    const container = document.getElementById('options-container');
+    container.innerHTML = '';
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option';
+      btn.innerHTML = `<span class="option-emoji">${opt.emoji}</span><span class="option-text">${opt.text}</span>`;
+      btn.onclick = () => selectOption(i, opt.score, btn);
+      container.appendChild(btn);
+    });
+  }
+
+  function selectOption(index, score, btnEl) {
+    document.querySelectorAll('.option').forEach(b => b.classList.remove('selected'));
+    btnEl.classList.add('selected');
+    selectedScore = score;
+    document.getElementById('btn-next').style.display = 'block';
+  }
+
+  function nextQuestion() {
+    if (selectedScore === null) return;
+    totalScore += selectedScore;
+    currentQ++;
+    if (currentQ < questions.length) {
+      renderQuestion();
+    } else {
+      showResult();
+    }
+  }
+
+  function showResult() {
+    let key = totalScore >= 2 ? 'strong' : totalScore <= 5 ? 'growing' : 'needs';
+    const r = results[key];
+
+    document.getElementById('result-badge').textContent = r.badge;
+    document.getElementById('result-level').textContent = r.level;
+    document.getElementById('result-score').textContent = `Score: ${totalScore} / 8`;
+    document.getElementById('result-msg').textContent = r.msg;
+
+    const list = document.getElementById('suggestions-list');
+    list.innerHTML = '';
+    r.suggestions.forEach(s => {
+      list.innerHTML += `
+        <div class="suggestion-item">
+          <div class="suggestion-dot"></div>
+          <span>${s}</span>
+        </div>`;
+    });
+
+    show('screen-result');
+  }
+
+  function restartQuiz() {
+    startQuiz();
+  }
+</script>
+</body>
+</html>
